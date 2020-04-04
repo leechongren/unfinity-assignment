@@ -49,9 +49,9 @@ app.get("/commonstudents", async (req, res) => {
       const listOfStudents = arrayOfStudents.map(
         (student) => student["student"]
       );
+      listOfStudents.push(MESSAGE_FOR_ONLY_ONE_TEACHER);
       result.students = listOfStudents;
     }
-    console.log(result);
     res.status(200).json(result);
   } catch (err) {
     console.log(err);
