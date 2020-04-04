@@ -77,4 +77,19 @@ app.get("/commonstudents", async (req, res) => {
   }
 });
 
+app.post("/suspend", async (req, res) => {
+  try {
+    await Student.sync();
+    const student = req.body.student;
+    await Student.update(
+      { suspended: true },
+      {
+        where: { student: student },
+      }
+    );
+    res.sendStatus(204);
+  } catch (err) {
+    console.log(err);
+  }
+});
 module.exports = app;
