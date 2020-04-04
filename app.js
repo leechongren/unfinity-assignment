@@ -30,7 +30,7 @@ app.post("/register", async (req, res) => {
         where: { teacher: req.body.teacher, student: student },
       });
     });
-    res.sendStatus(204);
+    res.status(204);
   } catch (err) {
     console.log(err);
   }
@@ -39,7 +39,11 @@ app.post("/register", async (req, res) => {
 app.get("/commonstudents", async (req, res) => {
   try {
     const result = {};
-    if (Array.isArray(req.query.teacher)) {
+    const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
+    const getValuesFromKeys = (arr, str) => {
+      return arr.map((ele) => ele[str]);
+    };
+    if (hasMoreThanOneTeacher) {
       const arrayOfStudents = await Teacher_Student.findAll({
         attributes: ["student"],
         where: {
@@ -49,9 +53,7 @@ app.get("/commonstudents", async (req, res) => {
         },
         group: ["student"],
       });
-      const listOfStudents = arrayOfStudents.map(
-        (student) => student["student"]
-      );
+      const listOfStudents = getValuesFromKeys(arrayOfStudents, "student");
       result.students = listOfStudents;
     } else {
       const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
@@ -61,9 +63,7 @@ app.get("/commonstudents", async (req, res) => {
           teacher: req.query.teacher,
         },
       });
-      const listOfStudents = arrayOfStudents.map(
-        (student) => student["student"]
-      );
+      const listOfStudents = getValuesFromKeys(arrayOfStudents, "student");
       listOfStudents.push(MESSAGE_FOR_ONLY_ONE_TEACHER);
       result.students = listOfStudents;
     }
