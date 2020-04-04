@@ -1,4 +1,6 @@
 const express = require("express");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 const app = express();
 const Teacher = require("./models/teacher.model");
 const Student = require("./models/student.model");
@@ -38,6 +40,19 @@ app.get("/commonstudents", async (req, res) => {
   try {
     const result = {};
     if (Array.isArray(req.query.teacher)) {
+      const arrayOfStudents = await Teacher_Student.findAll({
+        attributes: ["student"],
+        where: {
+          teacher: {
+            [Op.or]: req.query.teacher,
+          },
+        },
+        group: ["student"],
+      });
+      const listOfStudents = arrayOfStudents.map(
+        (student) => student["student"]
+      );
+      result.students = listOfStudents;
     } else {
       const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
       const arrayOfStudents = await Teacher_Student.findAll({
