@@ -34,4 +34,28 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/commonstudents", async (req, res) => {
+  try {
+    const result = {};
+    if (Array.isArray(req.query.teacher)) {
+    } else {
+      const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
+      const arrayOfStudents = await Teacher_Student.findAll({
+        attributes: ["student"],
+        where: {
+          teacher: req.query.teacher,
+        },
+      });
+      const listOfStudents = arrayOfStudents.map(
+        (student) => student["student"]
+      );
+      result.students = listOfStudents;
+    }
+    console.log(result);
+    res.status(200).json(result);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 module.exports = app;
