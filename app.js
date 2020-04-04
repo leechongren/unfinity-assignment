@@ -30,7 +30,7 @@ app.post("/register", async (req, res) => {
         where: { teacher: req.body.teacher, student: student },
       });
     });
-    res.status(204);
+    res.sendStatus(204);
   } catch (err) {
     console.log(err);
   }
@@ -44,14 +44,18 @@ app.get("/commonstudents", async (req, res) => {
       return arr.map((ele) => ele[str]);
     };
     if (hasMoreThanOneTeacher) {
+      const countOfTeachers = req.query.teacher.length;
       const arrayOfStudents = await Teacher_Student.findAll({
         attributes: ["student"],
-        where: {
-          teacher: {
-            [Op.or]: req.query.teacher,
+        where: [
+          {
+            teacher: {
+              [Op.or]: req.query.teacher,
+            },
           },
-        },
+        ],
         group: ["student"],
+        having: Sequelize.literal(`count(student) = ${countOfTeachers}`),
       });
       const listOfStudents = getValuesFromKeys(arrayOfStudents, "student");
       result.students = listOfStudents;
