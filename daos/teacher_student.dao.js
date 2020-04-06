@@ -1,6 +1,7 @@
 const Teacher_Student = require("../models/teacher_student.model");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
+
 const registerStudentUnderTeacher = async (teacher, student) => {
   try {
     await Teacher_Student.sync();
