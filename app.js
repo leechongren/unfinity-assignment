@@ -96,9 +96,22 @@ app.post("/retrievefornotifications", async (req, res) => {
     const allStudentsForATeacher = await Teacher_StudentDAO.findAllStudentsBelongingToOneTeacher(
       req.body.teacher
     );
-    const listOfStudents = getValuesFromKeys(allStudentsForATeacher, "student");
-    const studentsToBeNotified = getMentionedStudents.concat(listOfStudents);
-    result.recipients = studentsToBeNotified;
+    const listOfStudentsForTeacher = getValuesFromKeys(
+      allStudentsForATeacher,
+      "student"
+    );
+    const combineNotifiedAndRegistered = getMentionedStudents.concat(
+      listOfStudentsForTeacher
+    );
+    const combinedAndNotSuspended = await StudentDAO.findFromListOfStudentsNotSuspended(
+      combineNotifiedAndRegistered
+    );
+
+    const getValuesFromCombinedAndNotSuspended = getValuesFromKeys(
+      combinedAndNotSuspended,
+      "student"
+    );
+    result.recipients = getValuesFromCombinedAndNotSuspended;
     res.status(200).json(result);
   } catch (err) {
     console.err;
