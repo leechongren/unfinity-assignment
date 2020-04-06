@@ -34,6 +34,20 @@ Use npm install to install the relevant packages in the NodeJS environment
 Runs the app in the local environment
 Open http://localhost:3000 to view it in the browser.
 
+### connecting to database
+
+Please open up the sequelize.js file under utils folder
+In there you will see the portion
+
+```
+const sequelize = new Sequelize("<SchemaName>", "<username>", "<password>", {
+  host: "localhost",
+  dialect: "mysql",
+});
+```
+
+Please insert the relevant SchemaName, Username and Password from your local instance.
+
 #### Routes
 
 ```
