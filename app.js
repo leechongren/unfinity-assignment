@@ -1,6 +1,4 @@
 const express = require("express");
-const Sequelize = require("sequelize");
-const Op = Sequelize.Op;
 const app = express();
 const TeacherDAO = require("./daos/teacher.dao");
 const StudentDAO = require("./daos/student.dao");
@@ -27,46 +25,41 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// app.get("/commonstudents", async (req, res) => {
-//   try {
-//     const result = {};
-//     const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
-//     const getValuesFromKeys = (arr, str) => {
-//       return arr.map((ele) => ele[str]);
-//     };
-//     if (hasMoreThanOneTeacher) {
-//       const countOfTeachers = req.query.teacher.length;
-//       const arrayOfStudents = await Teacher_Student.findAll({
-//         attributes: ["student"],
-//         where: [
-//           {
-//             teacher: {
-//               [Op.or]: req.query.teacher,
-//             },
-//           },
-//         ],
-//         group: ["student"],
-//         having: Sequelize.literal(`count(student) = ${countOfTeachers}`),
-//       });
-//       const listOfStudents = getValuesFromKeys(arrayOfStudents, "student");
-//       result.students = listOfStudents;
-//     } else {
-//       const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
-//       const arrayOfStudents = await Teacher_Student.findAll({
-//         attributes: ["student"],
-//         where: {
-//           teacher: req.query.teacher,
-//         },
-//       });
-//       const listOfStudents = getValuesFromKeys(arrayOfStudents, "student");
-//       listOfStudents.push(MESSAGE_FOR_ONLY_ONE_TEACHER);
-//       result.students = listOfStudents;
-//     }
-//     res.status(200).json(result);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// });
+app.get("/commonstudents", async (req, res) => {
+  try {
+    const result = {};
+    const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
+    const getValuesFromKeys = (arr, str) => {
+      return arr.map((ele) => ele[str]);
+    };
+    if (hasMoreThanOneTeacher) {
+      const countOfTeachers = req.query.teacher.length;
+      const allStudentsForAllTeachers = await Teacher_StudentDAO.findStudentsBelongingToAllTeachers(
+        req.query.teacher,
+        countOfTeachers
+      );
+      const listOfStudents = getValuesFromKeys(
+        allStudentsForAllTeachers,
+        "student"
+      );
+      result.students = listOfStudents;
+    } else {
+      const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
+      const allStudentsForATeacher = await Teacher_StudentDAO.findAllStudentsBelongingToOneTeacher(
+        req.query.teacher
+      );
+      const listOfStudents = getValuesFromKeys(
+        allStudentsForATeacher,
+        "student"
+      );
+      listOfStudents.push(MESSAGE_FOR_ONLY_ONE_TEACHER);
+      result.students = listOfStudents;
+    }
+    res.status(200).json(result);
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 // app.post("/suspend", async (req, res) => {
 //   try {
