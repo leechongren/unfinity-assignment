@@ -5,6 +5,10 @@ const StudentDAO = require("./daos/student.dao");
 const Teacher_StudentDAO = require("./daos/teacher_student.dao");
 app.use(express.json());
 
+const getValuesFromKeys = (arr, str) => {
+  return arr.map((ele) => ele[str]);
+};
+
 app.get("/", (req, res) => {
   res.send({
     "0": "POST /register",
@@ -29,9 +33,6 @@ app.get("/commonstudents", async (req, res) => {
   try {
     const result = {};
     const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
-    const getValuesFromKeys = (arr, str) => {
-      return arr.map((ele) => ele[str]);
-    };
     if (hasMoreThanOneTeacher) {
       const countOfTeachers = req.query.teacher.length;
       const allStudentsForAllTeachers = await Teacher_StudentDAO.findStudentsBelongingToAllTeachers(
@@ -92,7 +93,12 @@ app.post("/retrievefornotifications", async (req, res) => {
       .map((student) => {
         return student.substring(1);
       });
-    result.recipients = getMentionedStudents;
+    const allStudentsForATeacher = await Teacher_StudentDAO.findAllStudentsBelongingToOneTeacher(
+      req.body.teacher
+    );
+    const listOfStudents = getValuesFromKeys(allStudentsForATeacher, "student");
+    const studentsToBeNotified = getMentionedStudents.concat(listOfStudents);
+    result.recipients = studentsToBeNotified;
     res.status(200).json(result);
   } catch (err) {
     console.err;
