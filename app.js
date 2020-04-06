@@ -65,15 +65,18 @@ app.post("/suspend", async (req, res) => {
   try {
     const student = await StudentDAO.findStudent(req.body.student);
     if (student === null) {
-      throw new Error(
-        "Student does not exist in database, please ensure that student is registered"
-      );
+      throw new Error("Student Not Found");
     } else {
       await StudentDAO.suspendStudent(req.body.student);
     }
     res.sendStatus(204);
   } catch (err) {
-    res.status(404).send({ error: err.message });
+    if (err.message === "Student Not Found") {
+      res.status(404).send({
+        error:
+          "Student does not exist in database, please ensure that student is registered",
+      });
+    }
   }
 });
 
