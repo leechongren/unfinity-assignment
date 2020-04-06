@@ -12,6 +12,9 @@ const getValuesFromKeys = (arr, str) => {
 app.get("/", (req, res) => {
   res.send({
     "0": "POST /register",
+    "1": "GET /commonstudents",
+    "2": "POST /suspend",
+    "3": "POST /retrievefornotifications",
   });
 });
 
