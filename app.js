@@ -80,4 +80,22 @@ app.post("/suspend", async (req, res) => {
   }
 });
 
+app.post("/retrievefornotifications", async (req, res) => {
+  try {
+    const result = {};
+    const notifications = req.body.notification;
+    const getMentionedStudents = notifications
+      .split(" ")
+      .filter((word) => {
+        return word.indexOf("@") === 0;
+      })
+      .map((student) => {
+        return student.substring(1);
+      });
+    result.recipients = getMentionedStudents;
+    res.status(200).json(result);
+  } catch (err) {
+    console.err;
+  }
+});
 module.exports = app;
