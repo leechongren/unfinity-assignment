@@ -1,4 +1,6 @@
 const Student = require("../models/student.model");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 
 const findStudent = async (student) => {
   try {
@@ -34,4 +36,25 @@ const suspendStudent = async (student) => {
   }
 };
 
-module.exports = { findStudent, registerStudent, suspendStudent };
+const findFromListOfStudentsNotSuspended = async (students) => {
+  try {
+    await Student.sync();
+    return await Student.findAll({
+      attributes: ["student"],
+      raw: true,
+      where: {
+        suspended: false,
+        [Op.or]: { student: students },
+      },
+    });
+  } catch (err) {
+    console.err;
+  }
+};
+
+module.exports = {
+  findStudent,
+  registerStudent,
+  suspendStudent,
+  findFromListOfStudentsNotSuspended,
+};
