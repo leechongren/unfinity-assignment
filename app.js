@@ -61,19 +61,20 @@ app.get("/commonstudents", async (req, res) => {
   }
 });
 
-// app.post("/suspend", async (req, res) => {
-//   try {
-//     await Student.sync();
-//     const student = req.body.student;
-//     await Student.update(
-//       { suspended: true },
-//       {
-//         where: { student: student },
-//       }
-//     );
-//     res.sendStatus(204);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// });
+app.post("/suspend", async (req, res) => {
+  try {
+    const student = await StudentDAO.findStudent(req.body.student);
+    if (student === null) {
+      throw new Error(
+        "Student does not exist in database, please ensure that student is registered"
+      );
+    } else {
+      await StudentDAO.suspendStudent(req.body.student);
+    }
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(404).send({ error: err.message });
+  }
+});
+
 module.exports = app;
