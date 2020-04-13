@@ -16,15 +16,4 @@ registerStudents = async (teacher, students) => {
   }
 };
 
-const registerTeacher = async (data) => {
-  try {
-    await Teacher.sync();
-    return await Teacher.findOrCreate({
-      where: { teacher: data },
-    });
-  } catch (err) {
-    console.err;
-  }
-};
-
 module.exports = { registerTeacher, registerStudents };
