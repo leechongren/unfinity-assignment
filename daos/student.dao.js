@@ -14,7 +14,7 @@ const findStudent = async (student) => {
 const registerStudent = async (student) => {
   try {
     await Student.sync();
-    await Student.findOrCreate({
+    return await Student.findOrCreate({
       where: { student: student },
     });
   } catch (err) {

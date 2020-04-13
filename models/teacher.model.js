@@ -1,19 +1,15 @@
 const { Sequelize, sequelize } = require("../utils/sequelize");
+const Student = require("./student.model");
 
-const Model = Sequelize.Model;
-class Teacher extends Model {}
-
-Teacher.init(
-  {
-    teacher: {
-      type: Sequelize.STRING,
-      unique: true,
-    },
+const Teacher = sequelize.define("teacher", {
+  teacher: {
+    type: Sequelize.STRING,
+    unique: true,
   },
-  {
-    sequelize,
-    modelName: "teacher",
-  }
-);
+});
+
+Teacher.associate = (models) => {
+  Teacher.belongsToMany(models.Student, { through: "TeacherStudent" });
+};
 
 module.exports = Teacher;

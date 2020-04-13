@@ -1,23 +1,26 @@
 const { Sequelize, sequelize } = require("../utils/sequelize");
 
-const Model = Sequelize.Model;
-class Teacher_Student extends Model {}
-
-Teacher_Student.init(
-  {
-    teacher: {
-      type: Sequelize.STRING,
-      unique: "compositeIndex",
-    },
-    student: {
-      type: Sequelize.STRING,
-      unique: "compositeIndex",
-    },
+const Student = sequelize.define("student", {
+  student: {
+    type: Sequelize.STRING,
+    unique: true,
   },
-  {
-    sequelize,
-    modelName: "teacher_student",
-  }
-);
+  suspended: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false,
+  },
+});
 
-module.exports = Teacher_Student;
+const Teacher = sequelize.define("teacher", {
+  teacher: {
+    type: Sequelize.STRING,
+    unique: true,
+  },
+});
+
+Student.belongsToMany(Teacher, { through: "TeacherStudent" });
+Teacher.belongsToMany(Student, { through: "TeacherStudent" });
+
+sequelize.sync();
+
+module.exports = { Student, Teacher };
