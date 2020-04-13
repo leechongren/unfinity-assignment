@@ -22,10 +22,17 @@ app.post("/register", async (req, res) => {
   try {
     const students = req.body.students;
     await TeacherDAO.registerTeacher(req.body.teacher);
-    await students.map((student) => {
-      StudentDAO.registerStudent(student);
-      Teacher_StudentDAO.registerStudentUnderTeacher(req.body.teacher, student);
-    });
+    // await students.map((student) => {
+    //   await StudentDAO.registerStudent(student);
+    //   await Teacher_StudentDAO.registerStudentUnderTeacher(req.body.teacher, student);
+    // });
+    for (let i = 0; i < students.length; i++) {
+      await StudentDAO.registerStudent(students[i]);
+      await Teacher_StudentDAO.registerStudentUnderTeacher(
+        req.body.teacher,
+        students[i]
+      );
+    }
     res.sendStatus(204);
   } catch (err) {
     console.log(err);
