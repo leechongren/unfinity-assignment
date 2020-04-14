@@ -44,7 +44,6 @@ app.get("/commonstudents", async (req, res) => {
       );
       result.students = listOfStudents;
     } else {
-      const MESSAGE_FOR_ONLY_ONE_TEACHER = `student only under teacher ${req.query.teacher}`;
       const allStudentsForATeacher = await TeacherDAO.findCommonStudents(
         req.query.teacher
       );
@@ -52,7 +51,6 @@ app.get("/commonstudents", async (req, res) => {
         allStudentsForATeacher,
         "student"
       );
-      listOfStudents.push(MESSAGE_FOR_ONLY_ONE_TEACHER);
       result.students = listOfStudents;
     }
     res.status(200).json(result);
