@@ -34,7 +34,7 @@ app.get("/commonstudents", async (req, res) => {
     const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
     if (hasMoreThanOneTeacher) {
       const countOfTeachers = req.query.teacher.length;
-      const allStudentsForAllTeachers = await Teacher_StudentDAO.findStudentsBelongingToAllTeachers(
+      const allStudentsForAllTeachers = await TeacherDAO.findStudentsBelongingToAllTeachers(
         req.query.teacher,
         countOfTeachers
       );

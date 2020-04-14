@@ -1,5 +1,6 @@
 const Model = require("../models/teacher_student.model");
-
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 registerStudents = async (teacher, students) => {
   try {
     const [registeredTeacher, created] = await Model.Teacher.findOrCreate({
@@ -35,4 +36,38 @@ const findCommonStudents = async (teacher) => {
   }
 };
 
-module.exports = { findCommonStudents, registerStudents };
+const findStudentsBelongingToAllTeachers = async (
+  teachers,
+  countOfTeachers
+) => {
+  try {
+    const allStudents = await Model.Teacher.findAll({
+      where: [
+        {
+          teacher: {
+            [Op.or]: teachers,
+          },
+        },
+      ],
+      include: {
+        attributes: ["student"],
+        model: Model.Student,
+        through: { attributes: [] },
+      },
+      group: ["student"],
+      having: Sequelize.literal(`count(student) = ${countOfTeachers}`),
+    });
+    const plainResult = allStudents.map((student) => {
+      return student.get({ plain: true }).students;
+    });
+    return plainResult.flat();
+  } catch (err) {
+    console.err;
+  }
+};
+
+module.exports = {
+  findCommonStudents,
+  registerStudents,
+  findStudentsBelongingToAllTeachers,
+};
