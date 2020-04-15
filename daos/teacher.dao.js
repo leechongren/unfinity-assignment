@@ -85,9 +85,25 @@ const suspendStudent = async (student) => {
   }
 };
 
+const findNotSuspendedStudents = async (students) => {
+  try {
+    return await Model.Student.findAll({
+      attributes: ["student"],
+      raw: true,
+      where: {
+        suspended: false,
+        [Op.or]: { student: students },
+      },
+    });
+  } catch (err) {
+    console.err;
+  }
+};
+
 module.exports = {
   findCommonStudents,
   registerStudents,
   findStudentsBelongingToAllTeachers,
   suspendStudent,
+  findNotSuspendedStudents,
 };

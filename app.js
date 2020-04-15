@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 const TeacherDAO = require("./daos/teacher.dao");
-const StudentDAO = require("./daos/student.dao");
-const Teacher_StudentDAO = require("./daos/teacher_student.dao");
 app.use(express.json());
 
 const getValuesFromKeys = (arr, str) => {
@@ -79,8 +77,7 @@ app.post("/suspend", async (req, res) => {
 app.post("/retrievefornotifications", async (req, res) => {
   try {
     const result = {};
-    const notifications = req.body.notification;
-    const getMentionedStudents = notifications
+    const mentionedStudents = req.body.notification
       .split(" ")
       .filter((word) => {
         return word.indexOf("@") === 0;
@@ -88,20 +85,19 @@ app.post("/retrievefornotifications", async (req, res) => {
       .map((student) => {
         return student.substring(1);
       });
-    const allStudentsForATeacher = await Teacher_StudentDAO.findAllStudentsBelongingToOneTeacher(
+    const allStudentsForATeacher = await TeacherDAO.findCommonStudents(
       req.body.teacher
     );
     const listOfStudentsForTeacher = getValuesFromKeys(
       allStudentsForATeacher,
       "student"
     );
-    const combineNotifiedAndRegistered = getMentionedStudents.concat(
+    const combineNotifiedAndRegistered = mentionedStudents.concat(
       listOfStudentsForTeacher
     );
-    const combinedAndNotSuspended = await StudentDAO.findFromListOfStudentsNotSuspended(
+    const combinedAndNotSuspended = await TeacherDAO.findNotSuspendedStudents(
       combineNotifiedAndRegistered
     );
-
     const getValuesFromCombinedAndNotSuspended = getValuesFromKeys(
       combinedAndNotSuspended,
       "student"
