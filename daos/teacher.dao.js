@@ -1,7 +1,8 @@
 const Model = require("../models/teacher_student.model");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
-registerStudents = async (teacher, students) => {
+
+const registerStudents = async (teacher, students) => {
   try {
     const [registeredTeacher, created] = await Model.Teacher.findOrCreate({
       where: { teacher: teacher },
@@ -66,8 +67,27 @@ const findStudentsBelongingToAllTeachers = async (
   }
 };
 
+const suspendStudent = async (student) => {
+  try {
+    const found = await Model.Student.findOne({ where: { student: student } });
+    if (!found) {
+      throw new Error("Student Not Found");
+    } else {
+      await Model.Student.update(
+        { suspended: true },
+        {
+          where: { student: student },
+        }
+      );
+    }
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = {
   findCommonStudents,
   registerStudents,
   findStudentsBelongingToAllTeachers,
+  suspendStudent,
 };

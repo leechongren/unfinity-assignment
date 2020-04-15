@@ -61,11 +61,9 @@ app.get("/commonstudents", async (req, res) => {
 
 app.post("/suspend", async (req, res) => {
   try {
-    const student = await StudentDAO.findStudent(req.body.student);
-    if (student === null) {
-      throw new Error("Student Not Found");
-    } else {
-      await StudentDAO.suspendStudent(req.body.student);
+    const result = await TeacherDAO.suspendStudent(req.body.student);
+    if (result instanceof Error) {
+      throw result;
     }
     res.sendStatus(204);
   } catch (err) {
