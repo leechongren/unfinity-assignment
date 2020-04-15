@@ -65,13 +65,18 @@ app.get("/commonstudents", async (req, res) => {
 
 app.post("/suspend", async (req, res) => {
   try {
+    if (!req.body.student) {
+      throw new Error("No student");
+    }
     const result = await TeacherDAO.suspendStudent(req.body.student);
     if (result instanceof Error) {
       throw result;
     }
     res.sendStatus(204);
   } catch (err) {
-    if (err.message === "Student Not Found") {
+    if (err.message === "No student") {
+      res.status(422).send("Please enter a student's credential");
+    } else if (err.message === "Student Not Found") {
       res.status(404).send({
         error:
           "Student does not exist in database, please ensure that student is registered",
@@ -83,6 +88,9 @@ app.post("/suspend", async (req, res) => {
 app.post("/retrievefornotifications", async (req, res) => {
   try {
     const result = {};
+    if (!req.body.teacher || !req.body.students) {
+      throw new Error("Missing input");
+    }
     const mentionedStudents = req.body.notification
       .split(" ")
       .filter((word) => {
@@ -103,7 +111,13 @@ app.post("/retrievefornotifications", async (req, res) => {
     result.recipients = combinedAndNotSuspended;
     res.status(200).json(result);
   } catch (err) {
-    console.err;
+    if (err.message === "Missing input") {
+      res
+        .status(422)
+        .send(
+          "Missing input, please ensure that teacher and students are filled in!"
+        );
+    }
   }
 });
 module.exports = app;
