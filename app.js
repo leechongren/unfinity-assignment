@@ -34,6 +34,9 @@ app.post("/register", async (req, res) => {
 app.get("/commonstudents", async (req, res) => {
   try {
     const result = {};
+    if (!req.query.teacher) {
+      throw new Error("No teachers selected");
+    }
     const hasMoreThanOneTeacher = Array.isArray(req.query.teacher);
     if (hasMoreThanOneTeacher) {
       const countOfTeachers = req.query.teacher.length;
@@ -50,7 +53,13 @@ app.get("/commonstudents", async (req, res) => {
     }
     res.status(200).json(result);
   } catch (err) {
-    console.log(err);
+    if (err.message === "No teachers selected") {
+      res
+        .status(422)
+        .send(
+          "Please choose a teacher for display of registered students under him/her."
+        );
+    }
   }
 });
 
