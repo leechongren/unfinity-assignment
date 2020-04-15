@@ -3,10 +3,6 @@ const app = express();
 const TeacherDAO = require("./daos/teacher.dao");
 app.use(express.json());
 
-const getValuesFromKeys = (arr, str) => {
-  return arr.map((ele) => ele[str]);
-};
-
 app.get("/", (req, res) => {
   res.send({
     "0": "POST /register",
@@ -36,20 +32,12 @@ app.get("/commonstudents", async (req, res) => {
         req.query.teacher,
         countOfTeachers
       );
-      const listOfStudents = getValuesFromKeys(
-        allStudentsForAllTeachers,
-        "student"
-      );
-      result.students = listOfStudents;
+      result.students = allStudentsForAllTeachers;
     } else {
       const allStudentsForATeacher = await TeacherDAO.findCommonStudents(
         req.query.teacher
       );
-      const listOfStudents = getValuesFromKeys(
-        allStudentsForATeacher,
-        "student"
-      );
-      result.students = listOfStudents;
+      result.students = allStudentsForATeacher;
     }
     res.status(200).json(result);
   } catch (err) {
@@ -88,21 +76,13 @@ app.post("/retrievefornotifications", async (req, res) => {
     const allStudentsForATeacher = await TeacherDAO.findCommonStudents(
       req.body.teacher
     );
-    const listOfStudentsForTeacher = getValuesFromKeys(
-      allStudentsForATeacher,
-      "student"
-    );
     const combineNotifiedAndRegistered = mentionedStudents.concat(
-      listOfStudentsForTeacher
+      allStudentsForATeacher
     );
     const combinedAndNotSuspended = await TeacherDAO.findNotSuspendedStudents(
       combineNotifiedAndRegistered
     );
-    const getValuesFromCombinedAndNotSuspended = getValuesFromKeys(
-      combinedAndNotSuspended,
-      "student"
-    );
-    result.recipients = getValuesFromCombinedAndNotSuspended;
+    result.recipients = combinedAndNotSuspended;
     res.status(200).json(result);
   } catch (err) {
     console.err;

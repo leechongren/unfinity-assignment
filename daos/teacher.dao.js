@@ -2,6 +2,10 @@ const Model = require("../models/teacher_student.model");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
+const getValuesFromKeys = (arr, str) => {
+  return arr.map((ele) => ele[str]);
+};
+
 const registerStudents = async (teacher, students) => {
   try {
     const [registeredTeacher, created] = await Model.Teacher.findOrCreate({
@@ -31,7 +35,7 @@ const findCommonStudents = async (teacher) => {
         through: { attributes: [] },
       },
     });
-    return results.get({ plain: true }).students;
+    return getValuesFromKeys(results.get({ plain: true }).students, "student");
   } catch (err) {
     console.err;
   }
@@ -61,7 +65,7 @@ const findStudentsBelongingToAllTeachers = async (
     const plainResult = allStudents.map((student) => {
       return student.get({ plain: true }).students;
     });
-    return plainResult.flat();
+    return getValuesFromKeys(plainResult.flat(), "student");
   } catch (err) {
     console.err;
   }
@@ -87,7 +91,7 @@ const suspendStudent = async (student) => {
 
 const findNotSuspendedStudents = async (students) => {
   try {
-    return await Model.Student.findAll({
+    const result = await Model.Student.findAll({
       attributes: ["student"],
       raw: true,
       where: {
@@ -95,6 +99,7 @@ const findNotSuspendedStudents = async (students) => {
         [Op.or]: { student: students },
       },
     });
+    return getValuesFromKeys(result, "student");
   } catch (err) {
     console.err;
   }
