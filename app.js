@@ -14,11 +14,20 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, res) => {
   try {
+    if (!req.body.teacher || !req.body.students) {
+      throw new Error("Missing input");
+    }
     const students = req.body.students;
     await TeacherDAO.registerStudents(req.body.teacher, students);
     res.sendStatus(204);
   } catch (err) {
-    console.log(err);
+    if (err.message === "Missing input") {
+      res
+        .status(422)
+        .send(
+          "Missing input, please ensure that teacher and students are filled in!"
+        );
+    }
   }
 });
 
