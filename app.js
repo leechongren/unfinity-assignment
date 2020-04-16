@@ -12,26 +12,23 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/register", async (req, res) => {
+app.post("/register", async (req, res, next) => {
   try {
     if (!req.body.teacher || !req.body.students) {
-      throw new Error("Missing input");
+      throw new Error("Missing teacher or student input");
     }
     const students = req.body.students;
     await TeacherDAO.registerStudents(req.body.teacher, students);
     res.sendStatus(204);
   } catch (err) {
-    if (err.message === "Missing input") {
-      res
-        .status(422)
-        .send(
-          "Missing input, please ensure that teacher and students are filled in!"
-        );
+    if (err.message === "Missing teacher or student input") {
+      err.statusCode = 422;
     }
+    next(err);
   }
 });
 
-app.get("/commonstudents", async (req, res) => {
+app.get("/commonstudents", async (req, res, next) => {
   try {
     const result = {};
     if (!req.query.teacher) {
@@ -54,19 +51,16 @@ app.get("/commonstudents", async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     if (err.message === "No teachers selected") {
-      res
-        .status(422)
-        .send(
-          "Please choose a teacher for display of registered students under him/her."
-        );
+      err.statusCode = 422;
     }
+    next(err);
   }
 });
 
-app.post("/suspend", async (req, res) => {
+app.post("/suspend", async (req, res, next) => {
   try {
     if (!req.body.student) {
-      throw new Error("No student");
+      throw new Error("Please enter a student");
     }
     const result = await TeacherDAO.suspendStudent(req.body.student);
     if (result instanceof Error) {
@@ -74,22 +68,20 @@ app.post("/suspend", async (req, res) => {
     }
     res.sendStatus(204);
   } catch (err) {
-    if (err.message === "No student") {
-      res.status(422).send("Please enter a student's credential");
+    if (err.message === "Please enter a student") {
+      err.statusCode = 422;
     } else if (err.message === "Student Not Found") {
-      res.status(404).send({
-        error:
-          "Student does not exist in database, please ensure that student is registered",
-      });
+      err.statusCode = 404;
     }
+    next(err);
   }
 });
 
-app.post("/retrievefornotifications", async (req, res) => {
+app.post("/retrievefornotifications", async (req, res, next) => {
   try {
     const result = {};
-    if (!req.body.teacher || !req.body.students) {
-      throw new Error("Missing input");
+    if (!req.body.teacher) {
+      throw new Error("Missing teacher input");
     }
     const mentionedStudents = req.body.notification
       .split(" ")
@@ -111,13 +103,21 @@ app.post("/retrievefornotifications", async (req, res) => {
     result.recipients = combinedAndNotSuspended;
     res.status(200).json(result);
   } catch (err) {
-    if (err.message === "Missing input") {
-      res
-        .status(422)
-        .send(
-          "Missing input, please ensure that teacher and students are filled in!"
-        );
+    if (err.message === "Missing teacher input") {
+      err.statusCode = 422;
     }
+    next(err);
   }
 });
+
+app.use((err, req, res, next) => {
+  res.status(err.statusCode || 500);
+  console.log(err);
+  if (err.statusCode) {
+    res.send({ error: err.message });
+  } else {
+    res.send({ error: "internal server error" });
+  }
+});
+
 module.exports = app;
